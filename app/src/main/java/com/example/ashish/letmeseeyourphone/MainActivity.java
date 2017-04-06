@@ -22,18 +22,14 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
-
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-
 import sg.com.temasys.skylink.sdk.rtc.SkylinkConfig;
 import sg.com.temasys.skylink.sdk.listener.DataTransferListener;
 import sg.com.temasys.skylink.sdk.listener.LifeCycleListener;
@@ -47,14 +43,12 @@ import sg.com.temasys.skylink.sdk.rtc.SkylinkConnection;
  * Media projection code referred from
  * https://github.com/mtsahakis/MediaProjectionDemo
  */
+
 public class MainActivity extends Activity
     implements RemotePeerListener, DataTransferListener, LifeCycleListener {
 
     private static final String TAG = MainActivity.class.getName();
-
-
     private static final String ROOM_NAME = "screenshare";
-
     private static final int REQUEST_CODE = 1;
     private static final int TIME_OUT = 60;
 
