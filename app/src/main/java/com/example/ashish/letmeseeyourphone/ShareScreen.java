@@ -14,8 +14,9 @@ import android.widget.EditText;
 public class ShareScreen extends AppCompatActivity {
     private EditText shareScreenEditText;
     private Button shareScreenNow;
+
     @Override
-    protected void onCreate(Bundle savedInstancestate){
+    protected void onCreate(Bundle savedInstancestate) {
         super.onCreate(savedInstancestate);
         setContentView(R.layout.sharescreen);
 
@@ -26,14 +27,13 @@ public class ShareScreen extends AppCompatActivity {
         shareScreenNow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(ShareScreen.this,DisplayScreen.class);
+                Intent intent = new Intent(ShareScreen.this, DisplayScreen.class);
                 String ROOM_NAME = shareScreenEditText.getText().toString();
-                intent.putExtra("ROOM_Name",ROOM_NAME);
-                intent.putExtra("Flag",true);
+                intent.putExtra("ROOM_Name", ROOM_NAME);
+                intent.putExtra("Flag", true);
                 startActivity(intent);
             }
         });
-
 
 
     }

@@ -19,27 +19,27 @@ public class AccessScreen extends AppCompatActivity {
     private EditText accessScreenEditText;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState){
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.accessscreen);
-         accessScreen = (Button) findViewById(R.id.accesscreennow);
+        accessScreen = (Button) findViewById(R.id.accesscreennow);
 
-       accessScreenEditText = (EditText) findViewById(R.id.accessscreenedittext);
+        accessScreenEditText = (EditText) findViewById(R.id.accessscreenedittext);
 
 
-        accessScreen.setOnClickListener(new View.OnClickListener(){
+        accessScreen.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view){
-                Intent intent = new Intent(AccessScreen.this,DisplayScreen.class);
+            public void onClick(View view) {
+                Intent intent = new Intent(AccessScreen.this, DisplayScreen.class);
 
-                String ROOM_NAME= accessScreenEditText.getText().toString();
-                intent.putExtra("ROOM_Name",ROOM_NAME);
-                intent.putExtra("Flag",false);
+                String ROOM_NAME = accessScreenEditText.getText().toString();
+                intent.putExtra("ROOM_Name", ROOM_NAME);
+                intent.putExtra("Flag", false);
                 startActivity(intent);
 
             }
         });
 
     }
-    }
+}
 

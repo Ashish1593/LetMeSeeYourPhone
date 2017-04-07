@@ -52,8 +52,7 @@ public class DisplayScreen extends AppCompatActivity implements RemotePeerListen
     private int displayWidth;
     private int displayHeight;
     private int imagesProduced;
-    // private String APP_KEY;
-    // private String APP_SECRET;
+
     private MediaProjectionManager projectionManager;
     private ImageReader imageReader;
     private MediaProjection mediaProjection;
@@ -65,14 +64,15 @@ public class DisplayScreen extends AppCompatActivity implements RemotePeerListen
     private boolean connected;
     private ImageView imgViewer;
     private Button button;
+
     //private String flag ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.screenview);
 
-        String  APP_SECRET = getResources().getString(R.string.APP_SECRET);
-        String  APP_KEY = getResources().getString(R.string.APP_KEY);
+        String APP_SECRET = getResources().getString(R.string.APP_SECRET);
+        String APP_KEY = getResources().getString(R.string.APP_KEY);
         imgViewer = (ImageView) findViewById(R.id.image_view);
 
         projectionManager = (MediaProjectionManager)
@@ -83,18 +83,18 @@ public class DisplayScreen extends AppCompatActivity implements RemotePeerListen
                 Settings.Secure.ANDROID_ID);
 
         //Initialize skylinkConnection and connect to the room
-        if(APP_KEY.isEmpty()||APP_SECRET.isEmpty()){
+        if (APP_KEY.isEmpty() || APP_SECRET.isEmpty()) {
             showInitializationFailedAlert();
             return;
         }
         Bundle extras = getIntent().getExtras();
         String ROOM_NAME = extras.getString("ROOM_Name");
-       boolean flag = extras.getBoolean("Flag");
+        boolean flag = extras.getBoolean("Flag");
 
         initializeSkylinkConnection(APP_KEY);
         skylinkConnection.connectToRoom(APP_SECRET, ROOM_NAME, deviceId);
 
-        if(flag == true)
+        if (flag == true)
             startProjection();
 
 
@@ -115,6 +115,7 @@ public class DisplayScreen extends AppCompatActivity implements RemotePeerListen
 //        });
 
         // Start capture handling thread
+
         new Thread() {
             @Override
             public void run() {
@@ -176,7 +177,7 @@ public class DisplayScreen extends AppCompatActivity implements RemotePeerListen
     private SkylinkConfig getSkylinkConfig() {
         SkylinkConfig config = new SkylinkConfig();
         // AudioVideo config options can be NO_AUDIO_NO_VIDEO, AUDIO_ONLY, VIDEO_ONLY, AUDIO_AND_VIDEO;
-        config.setAudioVideoSendConfig(SkylinkConfig.AudioVideoConfig.NO_AUDIO_NO_VIDEO);
+        config.setAudioVideoSendConfig(SkylinkConfig.AudioVideoConfig.AUDIO_ONLY);
         config.setHasDataTransfer(true);
         config.setTimeout(TIME_OUT);
         return config;
@@ -237,6 +238,95 @@ public class DisplayScreen extends AppCompatActivity implements RemotePeerListen
         }
     }
 
+    /**
+     * LifeCycleListener implementation
+     */
+    @Override
+    public void onConnect(boolean isSuccessful, String message) {
+        showToast("onConnect " + isSuccessful);
+        connected = isSuccessful;
+    }
+
+    @Override
+    public void onWarning(int errorCode, String message) {
+        showToast("onWarning " + message);
+    }
+
+    @Override
+    public void onDisconnect(int errorCode, String message) {
+        showToast("onDisconnect " + message);
+    }
+
+    @Override
+    public void onReceiveLog(String message) {
+        showToast("onReceiveLog " + message);
+    }
+
+    @Override
+    public void onLockRoomStatusChange(String remotePeerId, boolean locked) {
+        showToast("onLockRoomStatusChange " + remotePeerId + " locked " + locked);
+    }
+
+    /**
+     * RemotePeerListener implementation
+     */
+
+    @Override
+    public void onRemotePeerJoin(String remotePeerId, Object userData, boolean hasDataChannel) {
+
+        if (!TextUtils.isEmpty(this.currentRemotePeerId)) {
+            showToast("A remote peer is already in the room");
+            return;
+        }
+
+        this.currentRemotePeerId = remotePeerId;
+        showToast("onRemotePeerJoin " + remotePeerId);
+    }
+
+    @Override
+    public void onRemotePeerUserDataReceive(String remotePeerId, Object userData) {
+        showToast("onRemotePeerUserDataReceive " + remotePeerId);
+    }
+
+    @Override
+    public void onOpenDataConnection(String remotePeerId) {
+        showToast("onOpenDataConnection " + remotePeerId);
+        //      Bundle extras = getIntent().getExtras();
+        //   String flag = extras.getString("Flag");
+        //  if(flag == "true") {
+        //    startProjection();
+    }
+
+    @Override
+    public void onRemotePeerLeave(String remotePeerId, String message) {
+        if (remotePeerId.equals(this.currentRemotePeerId)) {
+            this.currentRemotePeerId = null;
+        }
+        showToast("onRemotePeerLeave " + remotePeerId);
+    }
+    //}
+
+    /**
+     * DataTransferListener implementation
+     */
+    @Override
+    public void onDataReceive(String remotePeerId, final byte[] data) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "onDataReceive: " + data.length);
+                if (data != null && data.length != 0) {
+                    Bitmap bm = BitmapFactory.decodeByteArray(data, 0, data.length);
+                    Log.d(TAG, "Set Image : " + bm.toString());
+                    imgViewer.setImageBitmap(bm);
+                }
+            }
+        });
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+    }
 
     private class ImageAvailableListener implements ImageReader.OnImageAvailableListener {
         @Override
@@ -300,96 +390,6 @@ public class DisplayScreen extends AppCompatActivity implements RemotePeerListen
                 }
             }
         }
-    }
-
-    /**
-     * LifeCycleListener implementation
-     */
-    @Override
-    public void onConnect(boolean isSuccessful, String message) {
-        showToast("onConnect " + isSuccessful);
-        connected = isSuccessful;
-    }
-
-    @Override
-    public void onWarning(int errorCode, String message) {
-        showToast("onWarning " + message);
-    }
-
-    @Override
-    public void onDisconnect(int errorCode, String message) {
-        showToast("onDisconnect " + message);
-    }
-
-    @Override
-    public void onReceiveLog(String message) {
-        showToast("onReceiveLog " + message);
-    }
-
-    @Override
-    public void onLockRoomStatusChange(String remotePeerId, boolean locked) {
-        showToast("onLockRoomStatusChange " + remotePeerId + " locked " + locked);
-    }
-
-    /**
-     * RemotePeerListener implementation
-     */
-
-    @Override
-    public void onRemotePeerJoin(String remotePeerId, Object userData, boolean hasDataChannel) {
-
-        if (!TextUtils.isEmpty(this.currentRemotePeerId)) {
-            showToast("A remote peer is already in the room");
-            return;
-        }
-
-        this.currentRemotePeerId = remotePeerId;
-        showToast("onRemotePeerJoin " + remotePeerId);
-    }
-
-    @Override
-    public void onRemotePeerUserDataReceive(String remotePeerId, Object userData) {
-        showToast("onRemotePeerUserDataReceive " + remotePeerId);
-    }
-
-    @Override
-    public void onOpenDataConnection(String remotePeerId) {
-        showToast("onOpenDataConnection " + remotePeerId);
-  //      Bundle extras = getIntent().getExtras();
-    //   String flag = extras.getString("Flag");
-      //  if(flag == "true") {
-        //    startProjection();
-        }
-    //}
-
-    @Override
-    public void onRemotePeerLeave(String remotePeerId, String message) {
-        if (remotePeerId.equals(this.currentRemotePeerId)) {
-            this.currentRemotePeerId = null;
-        }
-        showToast("onRemotePeerLeave " + remotePeerId);
-    }
-
-    /**
-     * DataTransferListener implementation
-     */
-    @Override
-    public void onDataReceive(String remotePeerId, final byte[] data) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(TAG, "onDataReceive: " + data.length);
-                if (data != null && data.length != 0) {
-                    Bitmap bm = BitmapFactory.decodeByteArray(data, 0, data.length);
-                    Log.d(TAG, "Set Image : " + bm.toString());
-                    imgViewer.setImageBitmap(bm);
-                }
-            }
-        });
-    }
-
-    private void showToast(String message) {
-        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 
 }
